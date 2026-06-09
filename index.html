@@ -94,6 +94,23 @@
   footer{margin-top:28px;color:var(--muted);font-size:12px;text-align:center;line-height:1.6}
   footer b{color:var(--text)}
   .pool-note{font-size:11px;color:var(--muted);margin-top:6px}
+  .howto{margin:14px 0 4px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);overflow:hidden}
+  .howto-head{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:12px 16px;user-select:none}
+  .howto-head h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.12em;font-size:13px;margin:0;color:var(--text)}
+  .howto-head .chev{color:var(--muted);font-size:12px;transition:transform .2s}
+  .howto.collapsed .chev{transform:rotate(-90deg)}
+  .howto-body{padding:2px 16px 15px;font-size:13px;color:var(--muted);line-height:1.55}
+  .howto.collapsed .howto-body{display:none}
+  .howto-body .lead{color:var(--text);font-weight:600;margin:0 0 11px;font-size:14px}
+  .howto-body .legend{display:flex;flex-direction:column;gap:7px;margin:0 0 13px}
+  .howto-body .lg-row{display:flex;align-items:flex-start;gap:9px}
+  .howto-body .sw{flex:0 0 auto;width:15px;height:15px;border-radius:4px;margin-top:2px}
+  .howto-body .sw.g{background:var(--green-dim);border:1px solid var(--green)}
+  .howto-body .sw.a{background:var(--amber-dim);border:1px solid var(--amber)}
+  .howto-body .sw.r{background:var(--red-dim);border:1px solid var(--red)}
+  .howto-body .blk{margin:0 0 9px}
+  .howto-body .blk:last-child{margin-bottom:0}
+  .howto-body b{color:var(--text)}
   @media(max-width:560px){.title{font-size:26px}.tally .num{font-size:30px}.streak{margin-left:0;width:100%}}
 </style>
 </head>
@@ -127,6 +144,22 @@
       <div class="menu" id="menu" style="display:none"></div>
     </div>
     <div class="pool-note" id="pool-note"></div>
+  </div>
+
+  <div class="howto" id="howto">
+    <div class="howto-head" id="howto-toggle" role="button" tabindex="0" aria-expanded="true">
+      <h3>How to play</h3><span class="chev">&#9660;</span>
+    </div>
+    <div class="howto-body">
+      <p class="lead">Guess the mystery footballer in 8 tries or fewer.</p>
+      <div class="legend">
+        <div class="lg-row"><span class="sw g"></span><span>Type a name and each column shows how your guess compares. <b>Green</b> &mdash; exact match (same nation, confederation, position, club, league, or age).</span></div>
+        <div class="lg-row"><span class="sw a"></span><span><b>Amber</b> &mdash; close: the player's age is within 2 years of the answer.</span></div>
+        <div class="lg-row"><span class="sw r"></span><span><b>Red</b> &mdash; no match. On the <b>Age</b> column, &#9650; means the answer is older, &#9660; means younger.</span></div>
+      </div>
+      <p class="blk"><b>Mode</b> &mdash; <b>Daily</b> is one shared puzzle that locks once you solve it, with a new one each day. <b>Practice</b> gives unlimited rounds, a fresh random player every time.</p>
+      <p class="blk"><b>Pool</b> sets the difficulty &mdash; <b>Ballon d'Or</b>: 25 superstars (easiest, every answer is a household name). <b>Stars</b>: 185 well-known names across all 48 nations. <b>Full squads</b>: all 1,245 players including backups (expert).</p>
+    </div>
   </div>
 
   <div class="result" id="result">
@@ -366,6 +399,17 @@ $("pool-full").onclick=()=>setPool("full");
 $("play-again").onclick=()=>newRound();
 $("copy-btn").onclick=()=>{navigator.clipboard?.writeText($("share-box").textContent).then(()=>{$("copy-btn").textContent="Copied!";setTimeout(()=>$("copy-btn").textContent="Copy result",1500);});};
 
+/* ---- how to play panel ---- */
+function setHowto(open){
+  const h=$("howto"); if(!h)return;
+  h.classList.toggle("collapsed",!open);
+  $("howto-toggle").setAttribute("aria-expanded",open?"true":"false");
+  const s=loadSave(); s.howto=open?"open":"closed"; writeSave(s);
+}
+function collapseHowto(){ const h=$("howto"); if(h && !h.classList.contains("collapsed")) setHowto(false); }
+$("howto-toggle").onclick=()=>setHowto($("howto").classList.contains("collapsed"));
+$("howto-toggle").onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();$("howto-toggle").click();} };
+
 /* ---- boot ---- */
 (function(){
   const s=loadSave();
@@ -376,6 +420,7 @@ $("copy-btn").onclick=()=>{navigator.clipboard?.writeText($("share-box").textCon
   $("pool-stars").setAttribute("aria-pressed",pool==="stars");
   $("pool-full").setAttribute("aria-pressed",pool==="full");
   newRound();
+  setHowto(guesses.length ? false : (s.howto!=="closed"));
 })();
 </script>
 </body>
